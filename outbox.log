@@ -62,3 +62,17 @@ Active: True, On leave: True
 Please contact HR.
 
 --------------------------------------------------------------------------------
+[2026-02-09T01:08:45.768166] TO=alice@company.com SUBJECT=Leave of Absence Created (In Review)
+Hi ,
+
+Your LOA request has been created and is in review.
+
+TransactionId: LOA-FBDB862444
+Status: IN_REVIEW
+Requested Dates: 2026-03-10 to 2026-04-02
+Leave Balance (demo DB): 12 days
+
+Thanks,
+HR Automation Bot
+
+--------------------------------------------------------------------------------

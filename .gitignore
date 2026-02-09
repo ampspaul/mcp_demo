@@ -3,6 +3,16 @@
 .env.*
 !.env.example
 
+# Python packaging metadata
+*.egg-info/
+
+# Python bytecode cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+
 # OS-specific
 .DS_Store
 Thumbs.db
