@@ -1,5 +1,5 @@
 [project]
-name = "loa-mcp-uv"
+name = "mcp-demo"
 version = "0.1.0"
 description = "LOA demo: Mock Workday API + MCP SSE server + agent client (uv)"
 readme = "README.md"
