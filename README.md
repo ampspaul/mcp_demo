@@ -18,4 +18,5 @@ uv run python -m mcp_server.server_sse
 # Run : Agent
 uv run python -m agent_app.agent
 
-
+#RUN: UI
+uv run streamlit run ui_app.py 
