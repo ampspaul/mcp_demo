@@ -17,6 +17,7 @@ dependencies = [
   "fastmcp>=0.10", # FastMCP server with SSE transport
   "langchain-mcp-adapters>=0.1.0", # MultiServerMCPClient
   "langgraph[sqlite]>=0.2.0",
+  "streamlit>=1.54.0",
 ]
 
 [tool.uv]

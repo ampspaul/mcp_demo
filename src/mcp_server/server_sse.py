@@ -27,6 +27,10 @@ async def init_db():
             "INSERT OR IGNORE INTO leave_balance(employee_email, balance_days) VALUES (?, ?)",
             ("bob@company.com", 3),
         )
+        await db.execute(
+            "INSERT OR IGNORE INTO leave_balance(employee_email, balance_days) VALUES (?, ?)",
+            ("amps@company.com", 20),
+        )
         await db.commit()
 
 

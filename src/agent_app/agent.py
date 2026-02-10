@@ -58,7 +58,7 @@ async def main():
     checkpointer = InMemorySaver()
     app = build_graph(checkpointer)
 
-    thread_id = input("Thread id (ex: amps@company.com): ").strip()
+    thread_id = input("Enter your email Id: ").strip()
 
     while True:
         message = input("Enter the your message: ").strip()
@@ -72,7 +72,5 @@ async def main():
         print("ok:", result.get("ok"))
         print("message:", result.get("message"))
     
-
-
 if __name__ == "__main__":
     asyncio.run(main())

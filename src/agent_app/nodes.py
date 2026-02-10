@@ -6,33 +6,24 @@ from shared.extraction_llm import extract_leave_request_llm
 from shared.intent_llm import classify_intent_llm
 from shared.email_outbox import EmailOutbox
 from agent_app.mcpClient import get_mcp_tool_by_name
+from shared.friendly_message_llm import friendly_message_lln
+from shared.friendly_message_llm_success import friendly_message_lln_success
 
 
 # -----------------------------
 # LangGraph State
 # -----------------------------
 class AgentState(TypedDict, total=False):
-    # input
     email_from: str
     email_body: str
-
-    # NEW
     intent: str                 # "balance" | "create_loa" | "unknown"
     missing: list[str]          # missing fields like ["start_date","end_date"]
     last_answer: str            # what we told user last
-
-    # extracted
     req: Any  # LeaveRequest (pydantic)
-
-    # tools
     validation: Dict[str, Any]
     balance: Dict[str, Any]
-
-    # workday
     transaction_id: str
     status: str
-
-    # output
     ok: bool
     message: str
 
@@ -48,38 +39,29 @@ def normalize_tool_output(raw: Any) -> Dict[str, Any]:
     """
     if raw is None:
         return {}
-
-    # If list, normalize first element
     if isinstance(raw, list):
         if not raw:
             return {}
         return normalize_tool_output(raw[0])
 
-    # If dict wrapper with "content"
     if isinstance(raw, dict) and "content" in raw and isinstance(raw["content"], list) and raw["content"]:
         return normalize_tool_output(raw["content"][0])
 
-    # If it's a text-block dict
     if isinstance(raw, dict) and raw.get("type") == "text" and isinstance(raw.get("text"), str):
         text = raw["text"].strip()
-        # Try parse JSON
         try:
             obj = json.loads(text)
             if isinstance(obj, dict):
                 return obj
             return {"value": obj}
         except json.JSONDecodeError:
-            # Not JSON, return as-is
             return {"text": text}
-
-    # If plain dict, but nested wrappers like result/data/output
     if isinstance(raw, dict):
         for key in ("result", "data", "output"):
             if key in raw:
                 return normalize_tool_output(raw[key])
         return raw
 
-    # Fallback
     return {"value": raw}
 
 
@@ -149,11 +131,7 @@ async def node_create_loa(state: AgentState) -> AgentState:
     if not req:
         return {"ok": False, "message": "Missing leave details. Please provide start and end date."}
 
-    print("TEST3333333",req)
-
     tool_by_name = await get_mcp_tool_by_name()
-
-
     if not validation.get("ok_to_create_loa", False):
         email = validation.get("employee_email") or state.get("employee_email")
         if validation.get("currently_on_leave"):
@@ -166,7 +144,6 @@ async def node_create_loa(state: AgentState) -> AgentState:
         else:
             msg = f"{email} is not eligible to create LOA right now."
 
-        # Return a state update that downstream nodes can use
         return {
             "final_message": msg,
             "loa_created": False,
@@ -189,58 +166,136 @@ async def node_create_loa(state: AgentState) -> AgentState:
 async def node_email_success(state: AgentState) -> AgentState:
     req = state["req"]
     balance = state.get("balance", {})
+    validation = state.get("validation", {})    
     outbox = EmailOutbox()
 
-    outbox.send(
-        to=str(req.employee_email),
-        subject="Leave of Absence Created (In Review)",
-        body=(
-            f"Hi {req.employee_name or ''},\n\n"
-            f"Your LOA request has been created and is in review.\n\n"
-            f"TransactionId: {state.get('transaction_id')}\n"
-            f"Status: {state.get('status')}\n"
-            f"Requested Dates: {req.start_date} to {req.end_date}\n"
-            f"Leave Balance (demo DB): {balance.get('balance_days')} days\n\n"
-            f"Thanks,\nHR Automation Bot\n"
-        ),
-    )
-    return {"ok": True, "message": "LOA created and confirmation email sent."}
 
-
-async def node_email_failure(state: AgentState) -> AgentState:
-    # req may not exist if we never ran extract
-    req = state.get("req")
-    validation = state.get("validation", {})
-    outbox = EmailOutbox()
-
-    print("TEST555",req)
+    employee_name = getattr(req, "employee_name", "") if req else ""
+    start_date = getattr(req, "start_date", None) if req else None
+    end_date = getattr(req, "end_date", None) if req else None
+    reason = getattr(req, "reason", None) if req else None
 
     employee_email = (
         str(req.employee_email) if req and getattr(req, "employee_email", None)
         else str(state.get("email_from", ""))
     )
 
-    # If intent is unknown, just respond in chat (don’t send email)
-    if state.get("intent") == "unknown":
-        return {
-            "ok": False,
-            "message": "I can help with leave balance or creating a leave request. Try: 'what is my leave balance?' or 'create leave 2026-03-01 to 2026-03-03'."
-        }
+    prompt_vars = {
+        "employee_email": employee_email,
+        "employee_name": employee_name or "there",
+        "start_date": str(start_date) if start_date else "N/A",
+        "end_date": str(end_date) if end_date else "N/A",
+        "reason": reason or "N/A",
+        "active": validation.get("active"),
+        "currently_on_leave": validation.get("currently_on_leave"),
+        "balance_days": balance.get("balance_days", "N/A"),
+    }
 
-    # If we *are* failing create_loa validation, then send email
+    # ✅ LLM creates a user-friendly message
+    # llm_msg = await llm.ainvoke(FAILURE_PROMPT.format_messages(**prompt_vars))
+    # friendly_text = llm_msg.content.strip()
+
+    friendly_text=await friendly_message_lln_success(prompt_vars)
+
+    
+    outbox.send(
+        to=employee_email,
+        subject="Leave of Absence Created (In Review)",
+        body=f"Hi {employee_name or ''},\n\n{friendly_text}\n\nThanks,\nHR Leave Assistant",
+    )
+
+    # ✅ Return the real message to UI
+    return {"ok": True, "message": friendly_text, "email_sent": True}
+
+
+
+
+# async def node_email_failure(state: AgentState) -> AgentState:
+#     req = state.get("req")
+#     validation = state.get("validation", {})
+#     outbox = EmailOutbox()
+
+#     employee_email = (
+#         str(req.employee_email) if req and getattr(req, "employee_email", None)
+#         else str(state.get("email_from", ""))
+#     )
+
+#     # If intent is unknown, just respond in chat (don’t send email)
+#     if state.get("intent") == "unknown":
+#         return {
+#             "ok": False,
+#             "message": "I can help with leave balance or creating a leave request. Try: 'what is my leave balance?' or 'create leave 2026-03-01 to 2026-03-03'."
+#         }
+
+#     # If we *are* failing create_loa validation, then send email
+#     outbox.send(
+#         to=employee_email,
+#         subject="Leave of Absence Request - Action Needed",
+#         body=(
+#             f"Hi {getattr(req, 'employee_name', '') if req else ''},\n\n"
+#             f"We could not create your LOA.\n"
+#             f"Active: {validation.get('active')}, "
+#             f"On leave: {validation.get('currently_on_leave')}\n\n"
+#             f"Please contact HR.\n"
+#         ),
+#     )
+
+#     return {"ok": False, "message": "Validation failed; email sent to employee."}
+
+async def node_email_failure(state: AgentState) -> AgentState:
+    req = state.get("req")
+    validation = state.get("validation", {})          # or validate_employee
+    balance = state.get("get_leave_balance", {})      # if you have it
+    outbox = EmailOutbox()
+
+    employee_email = (
+        str(req.employee_email) if req and getattr(req, "employee_email", None)
+        else str(state.get("email_from", ""))
+    )
+
+    # If intent is unknown -> chat message only
+    if state.get("intent") == "unknown":
+        msg = (
+            "I can help with leave balance or creating a leave request.\n\n"
+            "Try:\n"
+            "- “what is my leave balance?”\n"
+            "- “leave from 2026-03-01 to 2026-03-03”"
+        )
+        return {"ok": False, "message": msg}
+
+    # Build inputs for LLM
+    employee_name = getattr(req, "employee_name", "") if req else ""
+    start_date = getattr(req, "start_date", None) if req else None
+    end_date = getattr(req, "end_date", None) if req else None
+    reason = getattr(req, "reason", None) if req else None
+
+    prompt_vars = {
+        "employee_email": employee_email,
+        "employee_name": employee_name or "there",
+        "start_date": str(start_date) if start_date else "N/A",
+        "end_date": str(end_date) if end_date else "N/A",
+        "reason": reason or "N/A",
+        "active": validation.get("active"),
+        "currently_on_leave": validation.get("currently_on_leave"),
+        "balance_days": balance.get("balance_days", "N/A"),
+    }
+
+    # ✅ LLM creates a user-friendly message
+    # llm_msg = await llm.ainvoke(FAILURE_PROMPT.format_messages(**prompt_vars))
+    # friendly_text = llm_msg.content.strip()
+
+    friendly_text=await friendly_message_lln(prompt_vars)
+
+    # Send email with same friendly text
     outbox.send(
         to=employee_email,
         subject="Leave of Absence Request - Action Needed",
-        body=(
-            f"Hi {getattr(req, 'employee_name', '') if req else ''},\n\n"
-            f"We could not create your LOA.\n"
-            f"Active: {validation.get('active')}, "
-            f"On leave: {validation.get('currently_on_leave')}\n\n"
-            f"Please contact HR.\n"
-        ),
+        body=f"Hi {employee_name or ''},\n\n{friendly_text}\n\nThanks,\nHR Leave Assistant",
     )
 
-    return {"ok": False, "message": "Validation failed; email sent to employee."}
+    # ✅ Return the real message to UI
+    return {"ok": False, "message": friendly_text, "email_sent": True}
+
 
 
 

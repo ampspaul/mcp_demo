@@ -1,0 +1,125 @@
+[2026-02-10T01:53:58.146178] TO=alice@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi None,
+
+We could not create your LOA.
+Active: True, On leave: True
+
+Please contact HR.
+
+--------------------------------------------------------------------------------
+[2026-02-10T02:14:45.421440] TO=alice@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+<coroutine object friendly_message_lln at 0x118860e40>
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
+[2026-02-10T02:16:57.406496] TO=alice@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+Subject: Leave of Absence Request Update
+
+Hi There,
+
+Thank you for your leave request for March 17 to March 23, 2026. Unfortunately, we cannot process your request at this time because you are currently on leave. 
+
+To proceed, please check your return date and consider submitting a new request once you are back at work. If you have any questions or need assistance, feel free to reach out.
+
+Best regards,  
+[Your Name]  
+HR Leave Team
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
+[2026-02-10T02:29:40.410068] TO=amps@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+Subject: Leave of Absence Request
+
+Hi there,
+
+Thank you for your request for leave from March 11 to March 21, 2026. Unfortunately, we cannot process your leave at this time due to the dates being in the future and our current policy requiring requests to be submitted within a specific timeframe.
+
+To proceed, please submit your leave request closer to your intended dates. If you have any questions or need assistance, feel free to reach out.
+
+Best regards,  
+[Your Name]  
+HR Leave Team
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
+[2026-02-10T02:30:56.063064] TO=amps@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+Subject: Leave of Absence Request
+
+Hi there,
+
+Thank you for your leave request for March 2 to March 6, 2026. Unfortunately, we cannot process your leave at this time due to the dates being in the future and our current policy requiring requests to be submitted within a specific timeframe.
+
+To proceed, please submit your request closer to the intended leave dates. If you have any questions or need assistance, feel free to reach out.
+
+Best regards,  
+[Your Name]  
+HR Leave Assistant
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
+[2026-02-10T02:36:13.684793] TO=amps@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+Subject: Leave of Absence Request
+
+Hi There,
+
+Thank you for your request for leave from March 3 to March 6, 2026. Unfortunately, we cannot process your leave at this time due to a lack of available leave balance. 
+
+To proceed, please check your leave balance and consider adjusting your request or discussing options with your manager. If you have any questions or need assistance, feel free to reach out.
+
+Best regards,  
+[Your Name]  
+HR Leave Team
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
+[2026-02-10T02:41:37.848559] TO=amps@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+Subject: Leave of Absence Request
+
+Hi there,
+
+Thank you for your request for leave from March 3 to March 7, 2026. Unfortunately, we cannot process leave requests for dates that are more than a year in advance. 
+
+To proceed, please submit your request closer to the desired dates, ideally within the next year. If you have any questions or need assistance, feel free to reach out!
+
+Best regards,  
+[Your Name]  
+HR Leave Team
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
+[2026-02-10T02:44:23.166137] TO=amps@company.com SUBJECT=Leave of Absence Request - Action Needed
+Hi ,
+
+Subject: Leave of Absence Request
+
+Hi there,
+
+Thank you for your request for leave from March 3 to March 6, 2026. Unfortunately, we are unable to process leave requests for dates that are more than a year in advance. 
+
+To proceed, please submit your leave request closer to the intended dates. If you have any questions or need assistance, feel free to reach out.
+
+Best regards,  
+[Your Name]  
+HR Leave Assistant
+
+Thanks,
+HR Leave Assistant
+--------------------------------------------------------------------------------
